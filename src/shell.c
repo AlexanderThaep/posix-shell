@@ -148,5 +148,9 @@ int main(int argc, char** argv) {
 		// processTokens();
 
 	}
+
+	free(input_buffer);
+	free(token_buffer);
+
 	return 0;
 }
