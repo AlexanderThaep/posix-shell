@@ -1,43 +1,33 @@
-SHELL=/bin/sh
-CC_VERBOSE = $(CC)
-CC_NO_VERBOSE = @echo "Building $@..."; $(CC)
+PREFIX := /usr/local
 
-ifeq ($(VERBOSE),YES)
-  V_CC = $(CC_VERBOSE)
-  AT := 
+CFLAGS   := -std=c99 -pedantic -Wall
+CC := cc
+
+ifeq ($(DEBUG),1)
+	CFLAGS += -Og -g3
 else
-  V_CC = $(CC_NO_VERBOSE)
-  AT := @
+	CFLAGS += -O3 -s
 endif
 
-CC := gcc
 OUT := shell
-BUILD_DIR := ./build
-SRC_DIR := ./src
-INC_DIR := ./include
+BUILD := ./build
+SRC := ${wildcard src/*.c}
+OBJ := ${SRC:%.c=$(BUILD)/%.o}
 
-C_FILES = $(wildcard *.c)
-O_FILES = $(C_FILES:.c=.o)
-	
-SRCS = $(shell find $(SRC_DIR) -name '*.c')
-OBJS = $(SRCS:%.c=$(BUILD_DIR)/%.o)
 
-.PHONY: all clean build run
+.PHONY: all clean build
 .DEFAULT: all
 
-all: clean build
+all: build
 
-build: $(BUILD_DIR)/$(OUT).out
+build: $(BUILD)/$(OUT)
 
-$(BUILD_DIR)/$(OUT).out: $(OBJS)
-	$(V_CC) -o $(BUILD_DIR)/$(OUT).out $^  
+$(BUILD)/$(OUT): $(OBJ)
+	$(CC) -o $(BUILD)/$(OUT) $(LDFLAGS) $^  
 
-$(BUILD_DIR)/%.o: %.c
-	mkdir -p $(dir $@)
-	$(V_CC) -I$(INC_DIR) -c -o $@ $<
+$(BUILD)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	$(AT)-rm -rf $(BUILD_DIR)/*
-
-run: $(BUILD_DIR)/$(OUT).out
-	$(AT)$<
+	@rm -r $(BUILD)
