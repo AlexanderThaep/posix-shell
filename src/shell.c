@@ -123,8 +123,7 @@ int main(int argc, char** argv) {
 	token_buffer = (char**) malloc(sizeof(char*) * TBUFFER_SIZE);
 
 	if (input_buffer == NULL || token_buffer == NULL) {
-		perror("Cannot allocate memory to buffers...\n");
-		abort();
+		goto error;
 	}
 
 	while (EXIT_STATUS == 0) {
@@ -148,9 +147,6 @@ int main(int argc, char** argv) {
 		// processTokens();
 
 	}
-
-	free(input_buffer);
-	free(token_buffer);
 
 	return 0;
 
