@@ -1,6 +1,9 @@
 PREFIX := /usr/local
 
-CFLAGS   := -std=c99 -pedantic -Wall
+INCS := -Iinclude/
+
+CFLAGS := -std=gnu17 -Wall $(INCS)
+LDFLAGS :=
 CC := cc
 
 ifeq ($(DEBUG),1)
