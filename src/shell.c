@@ -5,6 +5,8 @@
 #define BUFFER_SIZE 256
 #define TBUFFER_SIZE 16
 
+#define PROGRAM_NAME "shell"
+
 int EXIT_STATUS = 0;
 int BUILTINS_COUNT = 4;
 char* BUILTINS[] = {"help", "exit", "cd", "ls"};
@@ -121,20 +123,17 @@ int main(int argc, char** argv) {
 	token_buffer = (char**) malloc(sizeof(char*) * TBUFFER_SIZE);
 
 	if (input_buffer == NULL || token_buffer == NULL) {
-		perror("Cannot allocate memory to buffers...\n");
-		abort();
+		goto error;
 	}
 
 	while (EXIT_STATUS == 0) {
 		time_t seconds = time(NULL);
 		printf("[%ld] Enter command: ", seconds);
 		if (readLine() == NULL) {
-			perror("Input error...\n");
-			abort();
+			goto error;
 		}
 		if (tokenizeLine() == NULL) {
-			perror("Tokenize error...\n");
-			abort();
+			goto error;
 		}
 
 		//
@@ -149,8 +148,13 @@ int main(int argc, char** argv) {
 
 	}
 
-	free(input_buffer);
-	free(token_buffer);
-
 	return 0;
+
+	error:
+	perror(PROGRAM_NAME);
+	free(input_buffer);
+	input_buffer = NULL;
+	free(token_buffer);
+	token_buffer = NULL;
+	return 1;
 }
