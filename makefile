@@ -1,24 +1,24 @@
-SHELL=/bin/sh
-CC_VERBOSE = $(CC)
-CC_NO_VERBOSE = @echo "Building $@..."; $(CC)
-
-ifeq ($(VERBOSE),YES)
-  V_CC = $(CC_VERBOSE)
-  AT := 
-else
-  V_CC = $(CC_NO_VERBOSE)
-  AT := @
-endif
-
 CC := gcc
 OUT := shell
 BUILD_DIR := ./build
 SRC_DIR := ./src
 INC_DIR := ./include
 
+SHELL=/bin/sh
+CC_NO_VERBOSE = @$(CC)
+CC_VERBOSE = echo "Building $@..."; $(CC)
+
+ifeq ($(VERBOSE),YES)
+	V_CC = $(CC_VERBOSE)
+	AT := 
+else
+	V_CC = $(CC_NO_VERBOSE)
+	AT := @
+endif
+
 C_FILES = $(wildcard *.c)
 O_FILES = $(C_FILES:.c=.o)
-	
+
 SRCS = $(shell find $(SRC_DIR) -name '*.c')
 OBJS = $(SRCS:%.c=$(BUILD_DIR)/%.o)
 
@@ -33,7 +33,7 @@ $(BUILD_DIR)/$(OUT).out: $(OBJS)
 	$(V_CC) -o $(BUILD_DIR)/$(OUT).out $^  
 
 $(BUILD_DIR)/%.o: %.c
-	mkdir -p $(dir $@)
+	$(AT)mkdir -p $(dir $@)
 	$(V_CC) -I$(INC_DIR) -c -o $@ $<
 
 clean:
