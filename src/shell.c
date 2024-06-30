@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include "parser.h"
 
 #define PROGRAM_NAME "shell"
 
@@ -13,7 +14,7 @@
 int main(void) {
   bool running = true;
   size_t length;
-  char *line = NULL, *line_copy = NULL, *token = NULL;
+  char *line = NULL, *line_copy = NULL, *token = NULL, *saveptr = NULL;
   int argc = 0;
   char **argv = NULL;
 
@@ -25,10 +26,10 @@ int main(void) {
 
     line_copy = strdup(line);
 
-    token = strtok(line, DELIM);
+    token = strtok_x(line, &saveptr);
 
     while (token) {
-      token = strtok(NULL, DELIM);
+      token = strtok_x(NULL, &saveptr);
       argc++;
     }
 
@@ -36,14 +37,15 @@ int main(void) {
 
     argc = 0;
 
-    token = strtok(line_copy, DELIM);
+    saveptr = NULL;
+    token = strtok_x(line_copy, &saveptr);
 
     int i = 0;
 
     for (; token; i++) {
       argv[i] = token;
 
-      token = strtok(NULL, DELIM);
+      token = strtok_x(NULL, &saveptr);
     }
 
     argv[i] = NULL;
