@@ -1,81 +1,41 @@
-#include <stdbool.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
+#include <errno.h>
 #include "parser.h"
 
 #define PROGRAM_NAME "shell"
 
 #define DELIM " \n"
 
-int main(void) {
-  bool running = true;
-  size_t length;
-  char *line = NULL, *line_copy = NULL, *token = NULL, *saveptr = NULL;
-  int argc = 0;
-  char **argv = NULL;
+int main(int argc, char** argv) {
+  bool interactive = false;
+  FILE* fp;
+  
+  if (argc == 2) {
+    fp = fopen(argv[1], "r");
+  } else if (argc == 1) {
+    interactive = true;
+    fp = stdin;
+  } else {
+    return 1;
+  }
 
-  while (running) {
-    printf("$ ");
+  char* line = NULL;
+  size_t length = 0;
+  int old_errno = errno;
 
-    if (getline(&line, &length, stdin) == -1)
-      goto error;
+  while (getline(&line, &length, fp) != -1) {
+    printf("%lu\n", length);
+  }
 
-    line_copy = strdup(line);
-
-    token = strtok_x(line, &saveptr);
-
-    while (token) {
-      token = strtok_x(NULL, &saveptr);
-      argc++;
-    }
-
-    argv = malloc(sizeof(token) * (argc + 1));
-
-    argc = 0;
-
-    saveptr = NULL;
-    token = strtok_x(line_copy, &saveptr);
-
-    int i = 0;
-
-    for (; token; i++) {
-      argv[i] = token;
-
-      token = strtok_x(NULL, &saveptr);
-    }
-
-    argv[i] = NULL;
-
-    pid_t child = fork();
-
-    if (child == 0) {
-      if (execvp(argv[0], argv) == -1) {
-        perror(PROGRAM_NAME);
-      }
-    } else if (child == -1) {
-      perror(PROGRAM_NAME);
-    } else {
-      int status;
-      waitpid(child, &status, 0);
-      printf("(last status: %d)", status);
-    }
-
-    free(argv);
-    argv = NULL;
-
-    free(line_copy);
-    line_copy = NULL;
+  if (errno != old_errno) {
+    perror(PROGRAM_NAME);
+    free(line);
+    return 1;
   }
 
   free(line);
 
   return 0;
-
-error:
-  free(line);
-  return 1;
 }
